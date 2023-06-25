@@ -7,35 +7,62 @@ import ImageGallery from './ImageGallery';
 import '../index.css';
 
 const API_KEY = '36109480-a7bba8644b808a178437f4df3';
-const API_URL = 'https://pixabay.com/api/';
 
 export class App extends Component {
   state = {
+    searchQuery: '',
     images: [],
+    isLoading: false,
+    page: 1,
   };
 
-  handleSubmit = async query => {
+  handleSearchSubmit = query => {
+    this.setState({ searchQuery: query, images: [], page: 1 });
+  };
+
+  handleLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
+  fetchImages = async () => {
+    const { searchQuery, page } = this.state;
+    const url = `https://pixabay.com/api/?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
+
+    this.setState({ isLoading: true });
+
     try {
-      const response = await axios.get(API_URL, {
-        params: {
-          key: API_KEY,
-          q: query,
-          per_page: 12,
-        },
-      });
-      const images = response.data.hits;
-      this.setState({ images });
+      const response = await axios.get(url);
+      const data = response.data.hits;
+      this.setState(prevState => ({
+        images: [...prevState.images, ...data],
+        isLoading: false,
+      }));
     } catch (error) {
-      console.log(error);
+      console.log('Error:', error);
+      this.setState({ isLoading: false });
     }
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.page !== this.state.page
+    ) {
+      this.fetchImages();
+    }
+  }
+
   render() {
-    const { images } = this.state;
+    const { images, isLoading } = this.state;
+
     return (
-      <div className="App">
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery images={images} />
+      <div>
+        <Searchbar onSubmit={this.handleSearchSubmit} />
+        <ImageGallery
+          images={images}
+          isLoading={isLoading}
+          onLoadMore={this.handleLoadMore}
+        />
       </div>
     );
   }

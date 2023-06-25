@@ -2,20 +2,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ImageGalleryItem from './components/ImageGalleryItem';
 import Button from './components/Button';
+import Loader from './components/Loader';
 
 import styles from './ImageGallery.module.css';
 
 export default class ImageGallery extends Component {
-  handleImageClick = () => {
-    // Obsługa kliknięcia na obrazek
-  };
-
-  handleLoadMore = () => {
-    // Obsługa ładowania kolejnej porcji obrazków
-  };
-
   render() {
-    const { images } = this.props;
+    const { images, isLoading, onLoadMore } = this.props;
 
     return (
       <div>
@@ -24,11 +17,14 @@ export default class ImageGallery extends Component {
             <ImageGalleryItem
               key={image.id}
               image={image}
-              onClick={this.handleImageClick}
+              webformatURL={image.webformatURL}
+              largeImageURL={image.largeImageURL}
+              alt={image.tags}
             />
           ))}
-          <Button onClick={this.handleLoadMore} />
         </ul>
+        {isLoading && <Loader />}
+        {images.length > 0 && !isLoading && <Button onLoadMore={onLoadMore} />}
       </div>
     );
   }
@@ -36,6 +32,6 @@ export default class ImageGallery extends Component {
 
 ImageGallery.propTypes = {
   images: PropTypes.array.isRequired,
-  // handleImageClick: PropTypes.func.isRequired,
-  // handleLoadMore: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  onLoadMore: PropTypes.func.isRequired,
 };

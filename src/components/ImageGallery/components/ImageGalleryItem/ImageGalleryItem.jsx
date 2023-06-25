@@ -1,31 +1,52 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Modal from '../Modal/Modal';
 
 import styles from './ImageGalleryItem.module.css';
 
 export default class ImageGalleryItem extends Component {
-  handleClick = () => {
-    const { onclick, image } = this.props;
-    onclick(image);
+  state = {
+    showModal: false,
+  };
+
+  handleImageClick = () => {
+    this.setState({ showModal: true });
+  };
+
+  closeModal = () => {
+    this.setState({ showModal: false });
   };
 
   render() {
-    const { image } = this.props;
+    const { webformatURL, largeImageURL, alt } = this.props;
+    const { showModal } = this.state;
+
+    if (!webformatURL || !largeImageURL || !alt) {
+      return null;
+    }
 
     return (
       <li className={styles['gallery-item']}>
         <img
-          src={image.webformatURL}
-          alt=""
+          src={webformatURL}
+          alt={alt}
           className={styles['gallery-item-image']}
-          onClick={this.handleClick}
+          onClick={this.handleImageClick}
         />
+        {showModal && (
+          <Modal
+            largeImageURL={largeImageURL}
+            alt={alt}
+            onClose={this.closeModal}
+          />
+        )}
       </li>
     );
   }
 }
 
 ImageGalleryItem.propTypes = {
-  image: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired,
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
 };
